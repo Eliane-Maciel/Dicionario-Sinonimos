@@ -11,12 +11,14 @@ typedef struct hashletras HashLetras;
 typedef struct palavras Palavras;
 typedef struct sinonimo Sinonimo;
 
+// Estrutura de Lista para letras - As letras são inseridas quando há palavras com a letra.
 struct hashletras {
     char letra;
     Palavras *palavras;
     HashLetras *prox;
 };
 
+// Estrutura de árvire para palavras - As palavras são inseridas em ordem alfabética pela lista de letras.
 struct palavras {
     char nome[100];
     int num_consultas;
@@ -24,6 +26,7 @@ struct palavras {
     Sinonimo *lista_sinonimo;
 };
 
+// Estrutura de lista de sinônimos - Cada palavra possui uma lista de sinônimos;
 struct sinonimo {
     Palavras *palavra;
     Sinonimo *prox;
@@ -67,6 +70,7 @@ Palavras *BuscaPalavra (Palavras *nodo, char l[100]){
     return BuscaPalavra(nodo->dir, l);
 }
 
+// Verifica se a palavra existe e caso não exista insere, retorna um ponteiro para o nodo da palavra;
 Palavras *InserePalavra(Palavras **p_raiz, char palavra[100]){
     Palavras *palavra_aux=NULL;
 
@@ -90,6 +94,7 @@ Palavras *InserePalavra(Palavras **p_raiz, char palavra[100]){
     }
 }
 
+// Insere a Letra em ordem alfabética numa lista de encadeamento simples.
 HashLetras *InsereLetra(HashLetras **letra_inicio, char l){
     HashLetras *busca_l=NULL, *ptaux=NULL, *ptaux2=NULL, *ptant=NULL;
 
@@ -125,6 +130,7 @@ HashLetras *InsereLetra(HashLetras **letra_inicio, char l){
     }
 }
 
+// Insere sinonimo em lista de sinonimos da Palavra.
 void InsereSinonimo(Sinonimo **sinonimo_inicio, Palavras *palavra){
     Sinonimo *aux2=NULL, *aux=NULL;
 
@@ -168,6 +174,7 @@ void escreve_conteudo_sinonimo(Sinonimo *sinonimo){
     }
 }
 
+// Escreve Dados da Palavra e seus sinonimos, rebebe a palavra.
 void escreve_palavra(Palavras *palavra){
     printf("Palavra: %s\t", palavra->nome);
     printf("Número de Consultas: %d\n",  palavra->num_consultas);
@@ -177,12 +184,13 @@ void escreve_palavra(Palavras *palavra){
     }
 }
 
-// Conta Palavras
+// Conta Palavras por árvore, recebe ponteiro para inicio da árvore;
 int conta_palavras(Palavras *raiz){
     if(raiz==NULL) return 0;
     return conta_palavras(raiz->esq) + conta_palavras(raiz->dir) + 1;
 }
 
+// Conta palavras no dicionario, Percorre as letras e conta as palavras por letra;
 int conta_palavras_dicionario(HashLetras *letra_inicio){
     int cont=0;
     if(letra_inicio == NULL){
@@ -234,6 +242,7 @@ int main(){
             escreve_conteudo_sinonimo(palavra_aux->lista_sinonimo);
             escreve_conteudo_sinonimo(palavra_aux2->lista_sinonimo);
         }
+        // Faz a Consulta pela palavra;
         else if(op==3){
             printf("Digite a palavra:\n");
             scanf("%s", nome);
@@ -248,6 +257,7 @@ int main(){
                 }
             }
         }
+        // Conta palavras do dicionário;
         else if(op==4){
             printf("O dicionario tem %d palavras.\n", conta_palavras_dicionario(hashletras_inicio));
         }
