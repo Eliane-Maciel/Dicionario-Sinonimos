@@ -164,12 +164,8 @@ void escreve_tabela_hash(HashLetras *hashletras){
 
 // escreve lista de sinonimos
 void escreve_conteudo_sinonimo(Sinonimo *sinonimo){
-    if(sinonimo == NULL){
-        printf("Não possui letra cadastrados.\n");
-        return;
-    }
     while(sinonimo != NULL){
-        printf("%s\n", sinonimo->palavra->nome);
+        printf("Sinônimo: %s\n", sinonimo->palavra->nome);
         sinonimo = sinonimo->prox;
     }
 }
@@ -205,20 +201,45 @@ int conta_palavras_dicionario(HashLetras *letra_inicio){
     return cont;
 }
 
+// Escreve Palavras e seus sinonimos
+void escreve_palavras(Palavras *raiz){
+    if(raiz==NULL) return;
+    escreve_palavras(raiz->esq);
+    printf("Palavra: %s\t", raiz->nome);
+    while(raiz->lista_sinonimo != NULL){
+        printf("Sinônimo: %s\t", raiz->lista_sinonimo->palavra->nome);
+        raiz->lista_sinonimo = raiz->lista_sinonimo->prox;
+    }
+    printf("\n");
+    escreve_palavras(raiz->dir);
+}
+
+// Percorre listas de sinonimos 
+void escreve_palavras_dicionario(HashLetras *letra_inicio){
+    if(letra_inicio == NULL){
+        return ;
+    }
+    while(letra_inicio != NULL){
+        if(letra_inicio->palavras != NULL){
+            escreve_palavras(letra_inicio->palavras);
+        }
+        letra_inicio = letra_inicio->prox;
+    }
+}
 
 int main(){
     HashLetras *hashletras_inicio=NULL, *my_letra=NULL, *my_letra2=NULL;
     Palavras *palavra_aux=NULL, *palavra_aux2=NULL, *busca_palavra=NULL;
-    char nome[100], nome2[100], letra, letra2;
-    int op=0;
+    char nome[100]={' '}, nome2[100]={' '}, letra=' ', letra2=' ';
+    int op=0, sinonimo=1;
 
     while(op<10){
-        // system("clear");
         printf("Digite a opção desejada!\n");
         printf("\t1 - Palavra.\n");
-        printf("\t2 - Escreve Sinonimos.\n");
+        printf("\t2 - Exibe Sinonimos.\n");
         printf("\t3 - Consulta.\n");
         printf("\t4 - Numero de Palavras.\n");
+        printf("\t5 - Exibe palavras do dicionário:\n");
         scanf("%d", &op);
 
         // Insere Palavra com o Sinonimo - Insere a letra na tabela hash, insere a palavra, e o sinonimo
@@ -229,18 +250,32 @@ int main(){
             letra = nome[0];
             my_letra = InsereLetra(&hashletras_inicio, letra);
             palavra_aux = InserePalavra(&(my_letra)->palavras, nome);
-            printf("Digite o sinonimo da palavra:\n");
+            while(sinonimo){
+                printf("Digite o sinonimo da palavra:\n");
+                scanf("%s", nome2);
+                TransformaMaiusculo(nome2);
+                letra2 = nome2[0];
+                my_letra2 = InsereLetra((&hashletras_inicio), letra);
+                palavra_aux2 = InserePalavra(&(my_letra2)->palavras, nome2);
+                InsereSinonimo(&(palavra_aux)->lista_sinonimo, palavra_aux2);
+                InsereSinonimo(&(palavra_aux2)->lista_sinonimo, palavra_aux);
+                printf("Existe mais sinonimos? se sim digite 1 se não digite 0.\n");
+                scanf("%d", &sinonimo);
+            }
+        }
+        else if(op==2){
+            printf("Digite a palavra que você deseja ver o sinonimo.\n");
             scanf("%s", nome2);
             TransformaMaiusculo(nome2);
             letra2 = nome2[0];
-            my_letra2 = InsereLetra((&hashletras_inicio), letra);
-            palavra_aux2 = InserePalavra(&(my_letra2)->palavras, nome2);
-            InsereSinonimo(&(palavra_aux)->lista_sinonimo, palavra_aux2);
-            InsereSinonimo(&(palavra_aux2)->lista_sinonimo, palavra_aux);
-        }
-        else if(op==2){
-            escreve_conteudo_sinonimo(palavra_aux->lista_sinonimo);
-            escreve_conteudo_sinonimo(palavra_aux2->lista_sinonimo);
+            my_letra2 = BuscaLetra(hashletras_inicio, letra2);
+            if(my_letra2 != NULL){
+                busca_palavra = BuscaPalavra(my_letra2->palavras, nome2);
+                if(busca_palavra != NULL){
+                    busca_palavra->num_consultas = busca_palavra->num_consultas++;
+                    escreve_conteudo_sinonimo(busca_palavra->lista_sinonimo);
+                }
+            }
         }
         // Faz a Consulta pela palavra;
         else if(op==3){
@@ -260,6 +295,9 @@ int main(){
         // Conta palavras do dicionário;
         else if(op==4){
             printf("O dicionario tem %d palavras.\n", conta_palavras_dicionario(hashletras_inicio));
+        }
+        else if(op==5){
+            escreve_palavras_dicionario(hashletras_inicio);
         }
     }
 }
